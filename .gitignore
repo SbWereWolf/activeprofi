@@ -1,1 +1,4 @@
-/.idea
+.htaccess
+.idea/
+
+vendor/*

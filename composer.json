@@ -1,0 +1,21 @@
+{
+    "name": "sbwerewolf/activeprofi",
+    "description": "Solution of test task for Active-Profi vacancy, web service for task tracker",
+    "type": "api",
+    "require": {
+        "slim/slim": "3.*",
+      "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Volkhin Nikolay aka SbWereWolf",
+            "email": "ulfnew@gmail.com"
+        }
+    ]
+}
