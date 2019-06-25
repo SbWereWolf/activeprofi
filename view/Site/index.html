@@ -14,8 +14,6 @@
     background-color: #f5f5f5;
   }
 
-  .table-hover-cells > tbody > tr > th.active:hover,
-  .table-hover-cells > tbody > tr > td.active:hover,
   .table-hover-cells > tbody > tr.active > th:hover,
   .table-hover-cells > tbody > tr.active > td:hover {
     background-color: #e8e8e8;
@@ -42,8 +40,6 @@
 <script>
 jQuery(function ($) {
 
-    loadPage(0, 10);
-
     $("#search").submit(function( event ) {
         event.preventDefault();
         const sample = $("#sample").val();
@@ -52,9 +48,11 @@ jQuery(function ($) {
             search(sample);
         }
         if(!sample){
-            loadPage(0, 10);
+            loadPage(0, settings.capacity);
         }
     });
+
+    loadPage(0, settings.capacity);
 });
 
 const settings = {
@@ -69,7 +67,7 @@ function loadPage(page, capacity) {
         type: "GET",
         url: `/api/v1/task/list/${page}/${capacity}/`,
         dataType:"json",
-        success: function( data,  textStatus,  jqXHR){
+        success: function( data){
             renderTasks(data);
             loadPaging(page, capacity)
             },
@@ -83,23 +81,16 @@ function loadPaging(page, capacity) {
         type: "GET",
         url: `/api/v1/task/list/amount/`,
         dataType:"json",
-        success: function( data,  textStatus,  jqXHR){
+        success: function( data){
             renderPaging(page, capacity,data);
             },
         error: function( jqXHR, textStatus, errorThrown){
         },
         timeout:500,
     });
-
 }
-function renderPaging(page, capacity,taskCount) {
 
-    page = parseInt(page);
-    capacity = parseInt(capacity);
-
-    const target = $('#paging');
-    target.empty();
-
+function getPagesAmount(capacity,taskCount){
     let isSuccess = taskCount.hasOwnProperty(0);
     let element;
     if(isSuccess){
@@ -120,35 +111,55 @@ function renderPaging(page, capacity,taskCount) {
     if(pagesLimit>roundLimit){
         roundLimit = roundLimit + 1;
     }
+    return roundLimit;
+}
+
+function placeOrdinal(pageIndex,printedPages,row){
+    row.append($("<td>").text(pageIndex+1).attr( "data-page", pageIndex));
+    printedPages.push(pageIndex);
+}
+
+function placeCurrent(page, printedPages, row){
+    row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
+    printedPages.push(page);
+
+    return true;
+}
+
+function renderPaging(page, capacity,taskCount) {
+
+    page = parseInt(page);
+    capacity = parseInt(capacity);
+
+    const target = $('#paging');
+    target.empty();
+
+    let roundLimit = getPagesAmount(capacity,taskCount);
+    let isSuccess = typeof roundLimit !== typeof undefined;
 
     let toStart = false;
     let toFinish = false;
     if(isSuccess){
         toStart = page - settings.placesGap - settings.pagesBefor > 0;
         toFinish = page + settings.placesGap + settings.pagesAfter < roundLimit-1 ;
-
     }
 
     let row = $("<tr>");
     const printedPages = [];
-    if(isSuccess&&toStart){
-        row.append($("<td>").text("1").attr( "data-page", 0));
-        row.append($("<td>").text(".."));
 
-        printedPages.push(1);
+    if(isSuccess&&toStart){
+        placeOrdinal(0,printedPages,row);
+        row.append($("<td>").text(".."));
     }
     let pageOccur = false;
     if(isSuccess&&!toStart){
         for(let index = 0 ; index < 2 ; index++){
             const addLink = (index < roundLimit) && !printedPages.includes(index);
             if(addLink && page !== index){
-                row.append($("<td>").text(index+1).attr( "data-page", index));
-                printedPages.push(index);
+                placeOrdinal(index,printedPages,row);
             }
             if(addLink && page === index && !printedPages.includes(index)){
-                row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
-                printedPages.push(page);
-                pageOccur = true;
+                pageOccur = placeCurrent(page, printedPages, row);
             }
         }
     }
@@ -158,73 +169,66 @@ function renderPaging(page, capacity,taskCount) {
             const currentPage = index - settings.pagesBefor + page;
             const addLink = (currentPage < roundLimit) && (currentPage > -1) && !printedPages.includes(currentPage);
             if(addLink){
-                row.append($("<td>").text(currentPage+1).attr( "data-page", currentPage));
-                printedPages.push(currentPage);
+                placeOrdinal(currentPage,printedPages,row);
             }
         }
-
-        if(!pageOccur && !printedPages.includes(page)){
-            row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
-                printedPages.push(page);
-            pageOccur = true;
-        }
-
-
-        for(let index = 1 ; index < settings.pagesAfter + 1 ; index++){
-            const currentPage = index + settings.pagesBefor - settings.pagesAfter + page;
-            const addLink = (currentPage < roundLimit) && (currentPage > -1) && !printedPages.includes(currentPage);
-            if(addLink){
-                row.append($("<td>").text(currentPage+1).attr( "data-page", currentPage));
-                printedPages.push(currentPage);
+    }
+    if(isSuccess&&!pageOccur && !printedPages.includes(page)){
+        pageOccur = placeCurrent(page, printedPages, row);
+    }
+    if(isSuccess){
+            for(let index = 1 ; index < settings.pagesAfter + 1 ; index++){
+                const currentPage = index + settings.pagesBefor - settings.pagesAfter + page;
+                const addLink = (currentPage < roundLimit) && (currentPage > -1) && !printedPages.includes(currentPage);
+                if(addLink){
+                    placeOrdinal(currentPage,printedPages,row);
+                }
             }
-        }
     }
 
     if(isSuccess&&toFinish&& !printedPages.includes(roundLimit-1)&&!printedPages.includes(roundLimit-2)){
         row.append($("<td>").text(".."));
         printedPages.push(roundLimit-2);
-        row.append($("<td>").text(roundLimit).attr( "data-page", roundLimit-1));
-        printedPages.push(roundLimit-1);
+        placeOrdinal(roundLimit-1,printedPages,row);
     }
+
     if(isSuccess&&!toFinish){
         for(let index = 0 ; index < 2 ; index++){
             const pageIndex = (roundLimit -2 + index);
             const addLink = (pageIndex < roundLimit) && !printedPages.includes(pageIndex);
             if(addLink && page !== index){
-                row.append($("<td>").text(pageIndex+1).attr( "data-page", pageIndex));
-                printedPages.push(pageIndex);
+                placeOrdinal(pageIndex,printedPages,row);
             }
             if(addLink && page === pageIndex && !printedPages.includes(pageIndex)){
-                row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
-                printedPages.push(page);
-                pageOccur = true;
+                placeCurrent(page, printedPages, row);
             }
         }
     }
 
-    let table;
     if(isSuccess){
-        table = $('<table>')
+        const table = $('<table>')
         .addClass("table table-hover-cells table-bordered")
         .append($("<tbody>").append(row));
 
         target.html(table);
 
-        target.on('click','tbody td',function() {
-                  const page = $(this).attr( "data-page");
-                  const isSuccess = typeof page !== typeof undefined;
-                  if(isSuccess){
-                      loadPage(page, settings.capacity);
-                  }
-                })
+        target.on('click','.table-hover-cells tbody td',function() {
+            const page = $(this).attr( "data-page");
+            const isSuccess = typeof page !== typeof undefined;
+            if(isSuccess){
+                loadPage(page, settings.capacity);
+            }
+        })
     }
 }
+
     function search(sample){
+        $('#paging').empty();
         $.ajax({
             type: "GET",
             url: `/api/v1/task/search/${sample}/`,
             dataType:"json",
-            success: function( data,  textStatus,  jqXHR){
+            success: function( data){
                 renderTasks(data);
             },
             error: function( jqXHR, textStatus, errorThrown){
@@ -268,7 +272,7 @@ function renderPaging(page, capacity,taskCount) {
           type: "GET",
           url: `/api/v1/task/${id}/`,
           dataType:"json",
-          success: function( data,  textStatus,  jqXHR){
+          success: function( data){
               const isSuccess = data.hasOwnProperty(0);
               if(isSuccess){
                   task=data[0];
@@ -291,14 +295,12 @@ function renderPaging(page, capacity,taskCount) {
 
 </script>
 
-<!-- Modal -->
   <div class="modal fade" id="detailTaskView" role="dialog">
     <div class="modal-dialog">
 
-      <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header" style="padding:35px 50px;">
-                <h4><span class="glyphicon glyphicon-lock"></span> Задание</h4>
+                <h4><span class="glyphicon glyphicon-list"></span> Задание</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
         <div class="modal-body">
@@ -335,8 +337,6 @@ function renderPaging(page, capacity,taskCount) {
   </div>
 
 </div>
-
-
 
 </body>
 </html>
