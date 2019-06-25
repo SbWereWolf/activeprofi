@@ -19,7 +19,7 @@ class Router extends \Environment\Basis\Router
         $app->get($root . 'list/{capacity}/{page}/', function (Request $request, Response $response, array $arguments)
         use ($dataSource) {
             $response = (new Controller($request, $response, $arguments, $dataSource))
-                ->letSearch()
+                ->letRetrievePortion()
                 ->process();
 
             return $response;
@@ -28,7 +28,7 @@ class Router extends \Environment\Basis\Router
         $app->get($root . 'list/{sample}/', function (Request $request, Response $response, array $arguments)
         use ($dataSource) {
             $response = (new Controller($request, $response, $arguments, $dataSource))
-                ->letRetrievePortion()
+                ->letSearch()
                 ->process();
 
             return $response;

@@ -65,9 +65,9 @@ class Reception extends \Environment\Basis\Reception
         return $value;
     }
 
-    private function getSample(): int
+    private function getSample(): string
     {
-        $value = $this->getParser()->getIntegerField(self::SAMPLE);
+        $value = $this->getParser()->getStringField(self::SAMPLE);
         return $value;
     }
 }

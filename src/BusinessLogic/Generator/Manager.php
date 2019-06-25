@@ -54,7 +54,7 @@ class Manager
 
                 if ($isSuccess) {
                     $task = (new Task())
-                        ->setTitle("$nouns[$titleNoun] $adjectives[$titleAdjective]")
+                        ->setTitle("$adjectives[$titleAdjective] $nouns[$titleNoun]")
                         ->setDateNumber($date)
                         ->setAuthor($adjectives[$authorAdjective])
                         ->setStatus($adjectives[$statusAdjective])
