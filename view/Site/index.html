@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Трекер рабочих заданий</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Трекер рабочих заданий</h1>
+
+    <form class="form-horizontal" id="search">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="sample">Поиск</label>
+            <div class="col-sm-10">
+                <input id="sample" class="form-control " type="search" placeholder="Введите наименование задачи" autofocus autocomplete="on" />
+            </div>
+        </div>
+    </form>
+    <div id="taskList">
+    </div>
+    <div id="paging">
+    </div>
+<script>
+jQuery(function ($) {
+
+    loadPage(0, 10);
+
+    $("#search").submit(function( event ) {
+        event.preventDefault();
+        const sample = $("#sample").val();
+
+        if(sample){
+            search(sample);
+        }
+        if(!sample){
+            loadPage(0, 10);
+        }
+    });
+});
+
+const settings = {
+    capacity : 10,
+    atStart : 10,
+    atFinish: 10
+};
+
+function loadPage(page, capacity) {
+    $.ajax({
+        type: "GET",
+        url: `/api/v1/task/list/${page}/${capacity}/`,
+        dataType:"json",
+        success: function( data,  textStatus,  jqXHR){
+            renderTasks(data);
+            loadPaging(page, capacity)
+            },
+        error: function( jqXHR, textStatus, errorThrown){
+        },
+        timeout:500,
+    });
+}
+function loadPaging(page, capacity) {
+    $.ajax({
+        type: "GET",
+        url: `/api/v1/task/list/amount/`,
+        dataType:"json",
+        success: function( data,  textStatus,  jqXHR){
+            renderPaging(page, capacity,data);
+            },
+        error: function( jqXHR, textStatus, errorThrown){
+        },
+        timeout:500,
+    });
+
+}
+function renderPaging(page, capacity,taskCount) {
+
+    const target = $('#paging');
+    target.empty();
+
+    let isSuccess = taskCount.hasOwnProperty(0);
+    let element;
+    if(isSuccess){
+        element = taskCount[0];
+        isSuccess = element .hasOwnProperty("amount");
+    }
+    let amount;
+    if(isSuccess){
+        amount = element.amount;
+    }
+    let table;
+    if(isSuccess){
+        pagesNumbers = Math.ceil(amount / capacity);
+        atStart = page < settings.atStart;
+        atFinish = page > (pagesNumbers - settings.atFinish);
+
+        table = $('<table>').addClass("table table-hover table-bordered");
+    }
+    if(isSuccess && atStart){
+        pagingLimit = Math.min(settings.atStart,pagesNumbers);
+        for(let index = 0 ; index < pagingLimit ; index++){
+            const addLink = index < pagingLimit;
+            if(addLink){
+                
+            }
+        }
+    }
+
+        table.append(
+            $('<thead>').append(
+                $('<tr>')
+                .append($('<th>').text('Номер задачи'))
+                .append($('<th>').text('Заголовок'))
+                .append($('<th>').text('Дата выполнения'))
+            )
+        );
+        const content = $('<tbody>');
+        $.each(taskCount,function(key,value) {
+            const id = value.id;
+            content.append(
+                $('<tr>').attr( "data-id", id)
+                .append($('<td>').text(id))
+                .append($('<td>').text(value.title))
+                .append($('<td>').text(value.date))
+            );
+        });
+
+        target.html(table.append(content));
+
+        target.on('click','tbody td',function() {
+          const page = $(this).attr( "data-page");
+          loadPage(page, settings.capacity);
+        })
+
+}
+    function search(sample){
+        $.ajax({
+            type: "GET",
+            url: `/api/v1/task/search/${sample}/`,
+            dataType:"json",
+            success: function( data,  textStatus,  jqXHR){
+                renderTasks(data);
+            },
+            error: function( jqXHR, textStatus, errorThrown){
+            },
+            timeout:500,
+        });
+    }
+    function renderTasks(data) {
+        const table = $('<table>').addClass("table table-hover table-bordered");
+        table.append(
+            $('<thead>').append(
+                $('<tr>')
+                .append($('<th>').text('Номер задачи'))
+                .append($('<th>').text('Заголовок'))
+                .append($('<th>').text('Дата выполнения'))
+            )
+        );
+        const content = $('<tbody>');
+        $.each(data,function(key,value) {
+            const id = value.id;
+            content.append(
+                $('<tr>').attr( "data-id", id)
+                .append($('<td>').text(id))
+                .append($('<td>').text(value.title))
+                .append($('<td>').text(value.date))
+            );
+        });
+        const target = $('#taskList');
+        target.empty();
+        target.html(table.append(content));
+
+        target.on('click','tbody tr',function() {
+          const id = $(this).attr( "data-id");
+          showTask(id);
+        })
+    }
+
+    function showTask(id) {
+        let task;
+        $.ajax({
+          type: "GET",
+          url: `/api/v1/task/${id}/`,
+          dataType:"json",
+          success: function( data,  textStatus,  jqXHR){
+              const isSuccess = data.hasOwnProperty(0);
+              if(isSuccess){
+                  task=data[0];
+
+                  $("#id").val(task.id);
+                  $("#title").val(task.title);
+                  $("#date").val(task.date);
+                  $("#author").val(task.author);
+                  $("#status").val(task.status);
+                  $("#description").val(task.description);
+
+                  $("#detailTaskView").modal();
+              }
+          },
+          error: function( jqXHR, textStatus, errorThrown){
+          },
+          timeout:500,
+        });
+    }
+
+</script>
+
+<!-- Modal -->
+  <div class="modal fade" id="detailTaskView" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" style="padding:35px 50px;">
+                <h4><span class="glyphicon glyphicon-lock"></span> Задание</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+        <div class="modal-body">
+          <form role="form">
+            <div class="form-group">
+              <label for="id"><span class="glyphicon glyphicon-bookmark"></span> id</label>
+              <input type="text" class="form-control" id="id" placeholder="Значение не задано" disabled>
+            </div>
+            <div class="form-group">
+              <label for="title"><span class="glyphicon glyphicon-text-color"></span> title</label>
+              <input type="text" class="form-control" id="title" placeholder="Значение не задано" disabled>
+            </div>
+            <div class="form-group">
+              <label for="date"><span class="glyphicon glyphicon-time"></span> date</label>
+              <input type="text" class="form-control" id="date" placeholder="Значение не задано" disabled>
+            </div>
+            <div class="form-group">
+              <label for="author"><span class="glyphicon glyphicon-user"></span> author</label>
+              <input type="text" class="form-control" id="author" placeholder="Значение не задано" disabled>
+            </div>
+            <div class="form-group">
+              <label for="status"><span class="glyphicon glyphicon-check"></span> status</label>
+              <input type="text" class="form-control" id="status" placeholder="Значение не задано" disabled>
+            </div>
+            <div class="form-group">
+              <label for="description"><span class="glyphicon glyphicon-pencil"></span> description</label>
+              <textarea class="form-control" id="description" placeholder="Значение не задано" disabled></textarea>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+</body>
+</html>
+

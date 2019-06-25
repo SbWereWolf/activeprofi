@@ -21,6 +21,7 @@ class Setup
 
         $app = (new \Environment\Task\Router($app))->settingUpRoutes()->getHandler();
         $app = (new \Environment\Storage\Router($app))->settingUpRoutes()->getHandler();
+        $app = (new \Environment\Site\Router($app))->settingUpRoutes()->getHandler();
 
         return $app;
     }
