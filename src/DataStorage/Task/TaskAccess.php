@@ -16,4 +16,6 @@ interface TaskAccess extends IDataAccess
     public function getTheTask(ITaskRequest $taskRequest): self;
 
     public function search(ITaskRequest $taskRequest): self;
+
+    public function countTask(ITaskRequest $taskRequest): self;
 }

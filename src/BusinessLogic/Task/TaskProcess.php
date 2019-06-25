@@ -46,4 +46,11 @@ class TaskProcess
 
         return $taskSet;
     }
+
+    public function countTasks(DataSource $dataPath): Content
+    {
+        $amountSet = (new TaskManager($this->getTaskRequest(), $dataPath))->countTasks();
+
+        return $amountSet;
+    }
 }

@@ -70,4 +70,14 @@ class TaskManager
 
         return $result;
     }
+
+    public function countTasks(): Content
+    {
+        $taskRequest = $this->getTaskRequest();
+        $dataPath = $this->getDataPath();
+
+        $result = (new TaskHandler($dataPath))->countTasks($taskRequest);
+
+        return $result;
+    }
 }

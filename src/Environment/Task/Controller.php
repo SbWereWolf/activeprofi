@@ -4,6 +4,7 @@ namespace Environment\Task;
 
 
 use BusinessLogic\Task\TaskProcess;
+use BusinessLogic\Task\TaskRequest;
 use Slim\Http\Response;
 
 class Controller extends \Environment\Basis\Controller
@@ -11,6 +12,7 @@ class Controller extends \Environment\Basis\Controller
     private $shouldRetrievePortion = false;
     private $shouldRetrieveTask = false;
     private $shouldSearch = false;
+    private $shouldCount = false;
 
     public function process(): Response
     {
@@ -40,6 +42,11 @@ class Controller extends \Environment\Basis\Controller
         $letSearch = $isGet && $this->isSearch();
         if ($letSearch) {
             $response = $this->search($reception);
+        }
+
+        $letCount = $isGet && $this->isCount();
+        if ($letCount) {
+            $response = $this->countTasks($reception);
         }
 
         return $response;
@@ -83,23 +90,20 @@ class Controller extends \Environment\Basis\Controller
         return $response;
     }
 
+    private function countTasks(Reception $reception): Response
+    {
+        $dataPath = $this->getDataPath();
+
+        $amountSet = (new TaskProcess(new TaskRequest()))->countTasks($dataPath);
+
+        $response = (new AmountPresentation($this->getRequest(), $this->getResponse(), $amountSet))->process();
+
+        return $response;
+    }
+
     public function letRetrievePortion(): self
     {
         $this->shouldRetrievePortion = true;
-
-        return $this;
-    }
-
-    public function letRetrieveTask(): self
-    {
-        $this->shouldRetrieveTask = true;
-
-        return $this;
-    }
-
-    public function letSearch(): self
-    {
-        $this->shouldSearch = true;
 
         return $this;
     }
@@ -109,13 +113,39 @@ class Controller extends \Environment\Basis\Controller
         return $this->shouldRetrievePortion;
     }
 
+    public function letRetrieveTask(): self
+    {
+        $this->shouldRetrieveTask = true;
+
+        return $this;
+    }
+
     private function isRetrieveTask(): bool
     {
         return $this->shouldRetrieveTask;
     }
 
+    public function letSearch(): self
+    {
+        $this->shouldSearch = true;
+
+        return $this;
+    }
+
     private function isSearch(): bool
     {
         return $this->shouldSearch;
+    }
+
+    public function letCount(): self
+    {
+        $this->shouldCount = true;
+
+        return $this;
+    }
+
+    private function isCount(): bool
+    {
+        return $this->shouldCount;
     }
 }

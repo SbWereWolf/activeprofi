@@ -3,8 +3,11 @@
 namespace DataStorage\Task;
 
 
+use BusinessLogic\Task\AmountSet;
 use BusinessLogic\Task\ITask;
 use BusinessLogic\Task\ITaskRequest;
+use Environment\Task\AmountSetView;
+use LanguageFeatures\ArrayParser;
 
 class TaskAccessSqlile extends CommonTaskAccess implements TaskAccess
 {
@@ -67,6 +70,7 @@ VALUES(
     {
         $requestText = '
 SELECT
+    t.id,
     t.title,
     strftime(\'%d.%m.%Y\', t.date, \'unixepoch\') AS date,
     t.author,
@@ -103,6 +107,49 @@ ORDER BY id
         $request = $this->prepareRequest($requestText);
         $request->bindValue(':SAMPLE', $taskRequest->getSample(),\PDO::PARAM_STR);
         $this->processForOutput($request)->processSuccess();
+
+        return $this;
+    }
+
+    public function countTask(ITaskRequest $taskRequest): TaskAccess
+    {
+        $requestText = '
+SELECT
+    count(*) as amount
+FROM
+    task t
+;
+   ';
+        $request = $this->prepareRequest($requestText);
+        $this->processAmountForOutput($request)->processSuccess();
+
+        return $this;
+    }
+
+    protected function processAmountForOutput(\PDOStatement $request): self
+    {
+        $isSuccess = $this->execute($request)->isSuccess();
+
+        $dataSet = array();
+        if ($isSuccess) {
+            $dataSet = $request->fetchAll(\PDO::FETCH_ASSOC);
+
+            $rowCount = count($dataSet);
+            $this->setRowCount($rowCount);
+        }
+
+        $shouldParseData = $isSuccess && $this->getRowCount() > 0;
+        $data = new AmountSet();
+        if ($shouldParseData) {
+
+            foreach ($dataSet as $dataRow) {
+                $parser = new ArrayParser($dataRow);
+                $amount = $parser->getIntegerField(AmountSetView::AMOUNT);
+                $data->push($amount);
+            }
+        }
+
+        $this->setData($data);
 
         return $this;
     }

@@ -16,7 +16,7 @@ class Router extends \Environment\Basis\Router
         $app = $this->getHandler();
         $dataSource = $this->getDataSource();
         $root = $this->root;
-        $app->get($root . 'list/{capacity}/{page}/', function (Request $request, Response $response, array $arguments)
+        $app->get($root . 'list/{page}/{capacity}/', function (Request $request, Response $response, array $arguments)
         use ($dataSource) {
             $response = (new Controller($request, $response, $arguments, $dataSource))
                 ->letRetrievePortion()
@@ -25,7 +25,7 @@ class Router extends \Environment\Basis\Router
             return $response;
         });
 
-        $app->get($root . 'list/{sample}/', function (Request $request, Response $response, array $arguments)
+        $app->get($root . 'search/{sample}/', function (Request $request, Response $response, array $arguments)
         use ($dataSource) {
             $response = (new Controller($request, $response, $arguments, $dataSource))
                 ->letSearch()
@@ -33,6 +33,16 @@ class Router extends \Environment\Basis\Router
 
             return $response;
         });
+
+        $app->get($root . 'list/amount/', function (Request $request, Response $response, array $arguments)
+        use ($dataSource) {
+            $response = (new Controller($request, $response, $arguments, $dataSource))
+                ->letCount()
+                ->process();
+
+            return $response;
+        });
+
         $app->get($root . '{id}/', function (Request $request, Response $response, array $arguments)
         use ($dataSource) {
             $response = (new Controller($request, $response, $arguments, $dataSource))

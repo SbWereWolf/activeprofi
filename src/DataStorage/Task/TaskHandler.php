@@ -26,6 +26,13 @@ class TaskHandler extends DataHandler
         return $result;
     }
 
+    public function countTasks(ITaskRequest $taskRequest): Content
+    {
+        $result = $this->getTaskAccess()->countTask($taskRequest)->getData();
+
+        return $result;
+    }
+
     private function getTaskAccess(): TaskAccess
     {
         $taskAccess = $this->taskAccess;
