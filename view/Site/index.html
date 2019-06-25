@@ -7,6 +7,20 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+  <style>
+  .table-hover-cells > tbody > tr > th:hover,
+  .table-hover-cells > tbody > tr > td:hover {
+    background-color: #f5f5f5;
+  }
+
+  .table-hover-cells > tbody > tr > th.active:hover,
+  .table-hover-cells > tbody > tr > td.active:hover,
+  .table-hover-cells > tbody > tr.active > th:hover,
+  .table-hover-cells > tbody > tr.active > td:hover {
+    background-color: #e8e8e8;
+  }
+</style>
 </head>
 <body>
 
@@ -44,9 +58,10 @@ jQuery(function ($) {
 });
 
 const settings = {
-    capacity : 10,
-    atStart : 10,
-    atFinish: 10
+    capacity: 10,
+    pagesBefor: 5,
+    pagesAfter: 5,
+    placesGap: 2,
 };
 
 function loadPage(page, capacity) {
@@ -79,6 +94,9 @@ function loadPaging(page, capacity) {
 }
 function renderPaging(page, capacity,taskCount) {
 
+    page = parseInt(page);
+    capacity = parseInt(capacity);
+
     const target = $('#paging');
     target.empty();
 
@@ -92,50 +110,114 @@ function renderPaging(page, capacity,taskCount) {
     if(isSuccess){
         amount = element.amount;
     }
-    let table;
-    if(isSuccess){
-        pagesNumbers = Math.ceil(amount / capacity);
-        atStart = page < settings.atStart;
-        atFinish = page > (pagesNumbers - settings.atFinish);
 
-        table = $('<table>').addClass("table table-hover table-bordered");
+    let pagesLimit = 0;
+    let roundLimit = 0;
+    if(isSuccess){
+        pagesLimit = amount / capacity;
+        roundLimit = Math.round(amount / capacity);
     }
-    if(isSuccess && atStart){
-        pagingLimit = Math.min(settings.atStart,pagesNumbers);
-        for(let index = 0 ; index < pagingLimit ; index++){
-            const addLink = index < pagingLimit;
-            if(addLink){
-                
+    if(pagesLimit>roundLimit){
+        roundLimit = roundLimit + 1;
+    }
+
+    let toStart = false;
+    let toFinish = false;
+    if(isSuccess){
+        toStart = page - settings.placesGap - settings.pagesBefor > 0;
+        toFinish = page + settings.placesGap + settings.pagesAfter < roundLimit-1 ;
+
+    }
+
+    let row = $("<tr>");
+    const printedPages = [];
+    if(isSuccess&&toStart){
+        row.append($("<td>").text("1").attr( "data-page", 0));
+        row.append($("<td>").text(".."));
+
+        printedPages.push(1);
+    }
+    let pageOccur = false;
+    if(isSuccess&&!toStart){
+        for(let index = 0 ; index < 2 ; index++){
+            const addLink = (index < roundLimit) && !printedPages.includes(index);
+            if(addLink && page !== index){
+                row.append($("<td>").text(index+1).attr( "data-page", index));
+                printedPages.push(index);
+            }
+            if(addLink && page === index && !printedPages.includes(index)){
+                row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
+                printedPages.push(page);
+                pageOccur = true;
             }
         }
     }
 
-        table.append(
-            $('<thead>').append(
-                $('<tr>')
-                .append($('<th>').text('Номер задачи'))
-                .append($('<th>').text('Заголовок'))
-                .append($('<th>').text('Дата выполнения'))
-            )
-        );
-        const content = $('<tbody>');
-        $.each(taskCount,function(key,value) {
-            const id = value.id;
-            content.append(
-                $('<tr>').attr( "data-id", id)
-                .append($('<td>').text(id))
-                .append($('<td>').text(value.title))
-                .append($('<td>').text(value.date))
-            );
-        });
+    if(isSuccess){
+        for(let index = 0 ; index < settings.pagesBefor ; index++){
+            const currentPage = index - settings.pagesBefor + page;
+            const addLink = (currentPage < roundLimit) && (currentPage > -1) && !printedPages.includes(currentPage);
+            if(addLink){
+                row.append($("<td>").text(currentPage+1).attr( "data-page", currentPage));
+                printedPages.push(currentPage);
+            }
+        }
 
-        target.html(table.append(content));
+        if(!pageOccur && !printedPages.includes(page)){
+            row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
+                printedPages.push(page);
+            pageOccur = true;
+        }
+
+
+        for(let index = 1 ; index < settings.pagesAfter + 1 ; index++){
+            const currentPage = index + settings.pagesBefor - settings.pagesAfter + page;
+            const addLink = (currentPage < roundLimit) && (currentPage > -1) && !printedPages.includes(currentPage);
+            if(addLink){
+                row.append($("<td>").text(currentPage+1).attr( "data-page", currentPage));
+                printedPages.push(currentPage);
+            }
+        }
+    }
+
+    if(isSuccess&&toFinish&& !printedPages.includes(roundLimit-1)&&!printedPages.includes(roundLimit-2)){
+        row.append($("<td>").text(".."));
+        printedPages.push(roundLimit-2);
+        row.append($("<td>").text(roundLimit).attr( "data-page", roundLimit-1));
+        printedPages.push(roundLimit-1);
+    }
+    if(isSuccess&&!toFinish){
+        for(let index = 0 ; index < 2 ; index++){
+            const pageIndex = (roundLimit -2 + index);
+            const addLink = (pageIndex < roundLimit) && !printedPages.includes(pageIndex);
+            if(addLink && page !== index){
+                row.append($("<td>").text(pageIndex+1).attr( "data-page", pageIndex));
+                printedPages.push(pageIndex);
+            }
+            if(addLink && page === pageIndex && !printedPages.includes(pageIndex)){
+                row.append($("<td>").text(page+1).attr( "data-page", page).addClass("bg-success"));
+                printedPages.push(page);
+                pageOccur = true;
+            }
+        }
+    }
+
+    let table;
+    if(isSuccess){
+        table = $('<table>')
+        .addClass("table table-hover-cells table-bordered")
+        .append($("<tbody>").append(row));
+
+        target.html(table);
 
         target.on('click','tbody td',function() {
-          const page = $(this).attr( "data-page");
-          loadPage(page, settings.capacity);
-        })
-
+                  const page = $(this).attr( "data-page");
+                  const isSuccess = typeof page !== typeof undefined;
+                  if(isSuccess){
+                      loadPage(page, settings.capacity);
+                  }
+                })
+    }
 }
     function search(sample){
         $.ajax({
