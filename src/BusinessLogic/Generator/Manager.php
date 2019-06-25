@@ -15,7 +15,7 @@ use DataStorage\Task\TaskHandler;
 class Manager
 {
     /* End Of Line symbol of file with words */
-    const WORDS_EOL = "\n";
+    const WORDS_EOL = "\r\n";
     /* Not A Number */
     const NAN = -1;
     private $dataSource = null;
@@ -34,6 +34,8 @@ class Manager
         $adjectivesNumber = count($adjectives);
         $isSuccess = ($nounsNumber > 10 && $adjectivesNumber > 10);
         if ($isSuccess) {
+            $nounsNumber--;
+            $adjectivesNumber--;
             $handler = new TaskHandler($this->getDataSource());
             $handler->beginTransaction();
             for ($counter = 0; $counter < 1000; $counter++) {
