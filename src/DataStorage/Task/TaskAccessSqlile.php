@@ -17,7 +17,8 @@ SELECT
     strftime(\'%d.%m.%Y\', t.date, \'unixepoch\') AS date
 FROM
     task t
-LIMIT :CAPACITY OFFSET (:CAPACITY * :PAGE_NUMBER) 
+ORDER BY id 
+LIMIT :CAPACITY OFFSET (:CAPACITY * :PAGE_NUMBER)
 ;
    ';
         $request = $this->prepareRequest($requestText);
@@ -96,12 +97,11 @@ FROM
     task t
 WHERE
   t.title LIKE \'%\' || :SAMPLE || \'%\'
-  OR t.author  LIKE \'%\' || :SAMPLE || \'%\'
-  OR t.description  LIKE \'%\' || :SAMPLE || \'%\'
+ORDER BY id
 ;
    ';
         $request = $this->prepareRequest($requestText);
-        $request->bindValue(':SAMPLE', $taskRequest->getId(),\PDO::PARAM_INT);
+        $request->bindValue(':SAMPLE', $taskRequest->getSample(),\PDO::PARAM_STR);
         $this->processForOutput($request)->processSuccess();
 
         return $this;
