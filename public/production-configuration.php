@@ -30,6 +30,8 @@ $configuration['addContentLengthHeader'] = false;
 $configuration[DATA_SOURCE_KEY] = $dataSource;
 unset($dataSource);
 $container = new Container([SETTINGS_KEY => $configuration]);
+const VIEW_RENDERER = 'view';
+$container[VIEW_RENDERER] = new \Slim\Views\PhpRenderer(APPLICATION_ROOT . DIRECTORY_SEPARATOR . 'view');
 
 $app = null;
 try {
