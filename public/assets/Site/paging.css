@@ -1,0 +1,14 @@
+/*
+ * © SbWereWolf activeprofi
+ * 2019.06.29
+ */
+
+.table-hover-cells > tbody > tr > th:hover,
+.table-hover-cells > tbody > tr > td:hover {
+    background-color: #f5f5f5;
+}
+
+.table-hover-cells > tbody > tr.active > th:hover,
+.table-hover-cells > tbody > tr.active > td:hover {
+    background-color: #e8e8e8;
+}
