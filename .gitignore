@@ -1,4 +1,5 @@
 .htaccess
 .idea/
 
-vendor/*
+vendor/**
+node_modules/**
