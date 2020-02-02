@@ -172,18 +172,6 @@ function renderPaging(page, capacity, taskCount) {
     }
 }
 
-async function search(sample) {
-    $('#paging').empty();
-    $.ajax({
-        type: "GET",
-        url: `/api/v1/task/search/${sample}/`,
-        dataType: "json",
-        success: renderTasks,
-        error: function (jqXHR, textStatus, errorThrown) {
-        },
-        timeout: 500,
-    });
-}
 
 function renderTasks(data) {
     const table = $('<table>').addClass("table table-hover table-bordered");

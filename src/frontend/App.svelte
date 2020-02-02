@@ -1,34 +1,54 @@
 <script>
-    jQuery(function ($) {
-        loadStartScreen();
-
-        $("#search").submit(async function (event) {
-            event.preventDefault();
-            const sample = $("#sample").val();
-
-            if (sample) {
-                search(sample);
-            }
-            if (!sample) {
-                loadStartScreen();
-            }
-        });
-    });
-
     function loadStartScreen() {
         loadPaging(0, settings.capacity);
         loadPage(0, settings.capacity);
     }
+
+    let sample = '';
+
+    async function search(sample) {
+        window.$('#paging').empty();
+        window.$.ajax({
+            type: "GET",
+            url: `/api/v1/task/search/${sample}/`,
+            dataType: "json",
+            success: renderTasks,
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            timeout: 500,
+        });
+    }
+
+    async function applySample(event) {
+
+        event.preventDefault();
+        if (sample) {
+            search(sample);
+        }
+        if (!sample) {
+            loadStartScreen();
+        }
+    }
+
 </script>
+
+<svelte:window on:load = {loadStartScreen} />
 
 <div class="container">
     <h1>Трекер рабочих заданий</h1>
 
-    <form class="form-horizontal" id="search">
+    <form class="form-horizontal" id="search"
+    on:submit="{applySample}">
         <div class="form-group">
-            <label class="control-label col-sm-2" for="sample">Поиск</label>
+            <label class="control-label col-sm-2" for="sample">
+            Поиск
+            </label>
             <div class="col-sm-10">
-                <input id="sample" class="form-control " type="search" placeholder="Введите наименование задачи" autofocus autocomplete="on" />
+                <input id="sample" class="form-control " type="search"
+                 placeholder="Введите наименование задачи"
+                 autofocus autocomplete="on"
+                 bind:value={sample}
+                 />
             </div>
         </div>
     </form>
