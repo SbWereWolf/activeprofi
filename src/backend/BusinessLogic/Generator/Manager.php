@@ -1,5 +1,10 @@
 <?php
 /**
+ * © SbWereWolf activeprofi
+ * 2020.02.08
+ */
+
+/**
  * Copyright © 2019 Volkhin Nikolay
  * Project: activeprofi
  * DateTime: 25.06.2019 0:19
@@ -11,6 +16,7 @@ namespace BusinessLogic\Generator;
 use BusinessLogic\Task\Task;
 use DataStorage\Basis\DataSource;
 use DataStorage\Task\TaskHandler;
+use Exception;
 
 class Manager
 {
@@ -82,7 +88,6 @@ class Manager
 
         $pureWords = [];
         foreach ($rawWords as $word) {
-            //$word = trim($word, self::WORDS_EOL);
             $isEmpty = empty($word);
             if (!$isEmpty) {
                 $pureWords[] = $word;
@@ -103,7 +108,7 @@ class Manager
     {
         try {
             $index = random_int(0, $max);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $index = self::NAN;
         }
         return $index;

@@ -1,18 +1,58 @@
 <script>
-    function loadStartScreen() {
-        loadPaging(0, settings.capacity);
-        loadPage(0, settings.capacity);
+    import {onMount} from 'svelte';
+
+    import DetailTaskView from './DetailTaskView.svelte';
+    import Paging from './Paging.svelte';
+    import SearchForm from './SearchForm.svelte';
+    import TaskList from './TaskList.svelte';
+
+    const settings = {
+        capacity: 10,
+        pagesBefore: 5,
+        pagesAfter: 5,
+        placesGap: 2,
+    };
+
+    function browsePage(event) {
+        const pageIndex = event.detail.index;
+        renderPage(pageIndex);
+    }
+    onMount(() => {
+        renderPage();
+    });
+
+    function renderPage(index = 0) {
+        requestPaging(index, settings.capacity);
+        requestPage(index, settings.capacity);
     }
 
-    let sample = '';
-
-    async function search(sample) {
-        window.$('#paging').empty();
+    let currentPage = 0;
+    let pageCapacity = 0;
+    let taskCount = {};
+    async function requestPaging(page, capacity) {
         window.$.ajax({
             type: "GET",
-            url: `/api/v1/task/search/${sample}/`,
+            url: `/api/v1/task/list/amount/`,
             dataType: "json",
-            success: renderTasks,
+            success: function (data) {
+                currentPage = parseInt(page);
+                pageCapacity = parseInt(capacity);
+                taskCount = data;
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            timeout: 500,
+        });
+    }
+    let taskCollection = [];
+    async function requestPage(page, capacity) {
+        window.$.ajax({
+            type: "GET",
+            url: `/api/v1/task/list/${page}/${capacity}/`,
+            dataType: "json",
+            success: function(data) {
+                taskCollection = data;
+            },
             error: function (jqXHR, textStatus, errorThrown) {
             },
             timeout: 500,
@@ -20,78 +60,63 @@
     }
 
     async function applySample(event) {
-
-        event.preventDefault();
-        if (sample) {
+        const sample = event.detail.sample;
+        if(sample){
             search(sample);
         }
-        if (!sample) {
-            loadStartScreen();
+        if(!sample){
+            renderPage();
         }
     }
+    async function search(sample) {
+        window.$.ajax({
+            type: "GET",
+            url: `/api/v1/task/search/${sample}/`,
+            dataType: "json",
+            success: function(data) {
+                taskCount = 0;
+                taskCollection = data;
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            timeout: 500,
+        });
+    }
 
+    function browseTask(event) {
+        const taskId = event.detail.id;
+        requestTask(taskId,renderTask);
+    }
+
+    async function requestTask(id,render) {
+        window.$.ajax({
+            type: "GET",
+            url: `/api/v1/task/${id}/`,
+            dataType: "json",
+            success: render,
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            timeout: 500,
+        });
+    }
+
+    let task = {};
+    function renderTask(data) {
+        const isSuccess = data.hasOwnProperty(0);
+        if (isSuccess) {
+            task = data[0];
+
+            window.$("#detailTaskView").modal();
+        }
+    }
 </script>
-
-<svelte:window on:load = {loadStartScreen} />
-
 <div class="container">
     <h1>Трекер рабочих заданий</h1>
-
-    <form class="form-horizontal" id="search"
-    on:submit="{applySample}">
-        <div class="form-group">
-            <label class="control-label col-sm-2" for="sample">
-            Поиск
-            </label>
-            <div class="col-sm-10">
-                <input id="sample" class="form-control " type="search"
-                 placeholder="Введите наименование задачи"
-                 autofocus autocomplete="on"
-                 bind:value={sample}
-                 />
-            </div>
-        </div>
-    </form>
-    <div id="taskList">
-    </div>
-    <div id="paging">
-    </div>
-
-  <div class="modal fade" id="detailTaskView" role="dialog">
-    <div class="modal-dialog">
-
-        <div class="modal-content">
-            <div class="modal-header" style="padding:35px 50px;">
-                <h4><span class="glyphicon glyphicon-list"></span> Информация по задаче #<span id="id"></span></h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-        <div class="modal-body">
-          <form role="form">
-            <div class="form-group">
-              <label for="title"><span class="glyphicon glyphicon-text-color"></span> Заголовок</label>
-              <input type="text" class="form-control" id="title" placeholder="Значение не задано" disabled>
-            </div>
-            <div class="form-group">
-              <label for="date"><span class="glyphicon glyphicon-time"></span> Дата выполнения</label>
-              <input type="text" class="form-control" id="date" placeholder="Значение не задано" disabled>
-            </div>
-            <div class="form-group">
-              <label for="author"><span class="glyphicon glyphicon-user"></span> Автор</label>
-              <input type="text" class="form-control" id="author" placeholder="Значение не задано" disabled>
-            </div>
-            <div class="form-group">
-              <label for="status"><span class="glyphicon glyphicon-check"></span> Статус</label>
-              <input type="text" class="form-control" id="status" placeholder="Значение не задано" disabled>
-            </div>
-            <div class="form-group">
-              <label for="description"><span class="glyphicon glyphicon-pencil"></span> Описание</label>
-              <textarea class="form-control" id="description" placeholder="Значение не задано" disabled></textarea>
-            </div>
-
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
+    <SearchForm on:search={applySample}></SearchForm>
+    <TaskList on:show="{browseTask}"
+    bind:taskCollection="{taskCollection}"></TaskList>
+    <Paging bind:page={currentPage} bind:capacity={pageCapacity}
+        bind:taskCount={taskCount} {settings}
+        on:move="{browsePage}"></Paging>
+    <DetailTaskView {...task}></DetailTaskView>
 </div>
