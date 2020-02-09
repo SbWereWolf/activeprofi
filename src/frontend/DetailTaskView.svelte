@@ -5,8 +5,14 @@
     export let author = "";
     export let status = "";
     export let description = "";
+
+    export let isModal = false;
+    function disableModal(){
+        isModal = false;
+    }
 </script>
-  <div class="modal fade" id="detailTaskView" role="dialog">
+  <div class="modal fade" id="detailTaskView" role="dialog"
+    class:in="{isModal}" style="{isModal ? 'display: block;' : ''}">
     <div class="modal-dialog">
 
         <div class="modal-content">
@@ -15,7 +21,8 @@
                 <span class="glyphicon glyphicon-list"></span>
                  Информация по задаче # {id}</h4>
                 <button type="button" class="close"
-                    data-dismiss="modal">&times;</button>
+                    data-dismiss="modal"
+                    on:click="{disableModal}">&times;</button>
             </div>
         <div class="modal-body">
           <form role="form">
