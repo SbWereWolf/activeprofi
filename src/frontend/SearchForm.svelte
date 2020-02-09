@@ -20,8 +20,7 @@ on:submit={search}>
         <div class="col-sm-10">
             <input id="sample" class="form-control" type="search"
              placeholder="Введите наименование задачи"
-             autofocus autocomplete="on"
-             bind:value={sample}
+             autocomplete="on" bind:value={sample}
              />
         </div>
     </div>

@@ -1,3 +1,4 @@
+<!--suppress UnnecessaryLabelJS -->
 <script>
     import {createEventDispatcher} from 'svelte';
     import OrdinalPlace from './OrdinalPlace.svelte';
@@ -16,7 +17,7 @@
 
     let roundLimit;
     let pagingPlaces;
-    {
+    $: {
         let isSuccess = taskCount.hasOwnProperty(0);
         let element;
         if (isSuccess) {
@@ -158,14 +159,16 @@
     }
 </script>
 
-<table class = "table table-hover-cells table-bordered">
-    <tbody>
-        <tr>
-        {#each pagingPlaces as place (place.index)}
-            <OrdinalPlace on:move="{browsePage}"
-            {...place}>
-            </OrdinalPlace>
-        {/each}
-        </tr>
-    </tbody>
-</table>
+{#if pagingPlaces.length}
+    <table class = "table table-hover-cells table-bordered">
+        <tbody>
+            <tr>
+            {#each pagingPlaces as place (place.index)}
+                <OrdinalPlace on:move="{browsePage}"
+                {...place}>
+                </OrdinalPlace>
+            {/each}
+            </tr>
+        </tbody>
+    </table>
+{/if}

@@ -4,4 +4,6 @@ vendor/**
 node_modules/**
 
 public/assets/Site/bundle.js
+/public/assets/Site/bundle.js.map
 public/assets/Site/bundle.css
+/public/assets/Site/bundle.css.map
