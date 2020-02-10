@@ -27,36 +27,38 @@
         requestPage(index, settings.capacity);
     }
 
+    const headers = new Headers(
+        {"Content-Type": "application/json; charset=utf-8",});
+
     let currentPage = 0;
     let pageCapacity = 0;
     let taskCount = {};
     async function requestPaging(page, capacity) {
-        window.$.ajax({
-            type: "GET",
-            url: `/api/v1/task/list/amount/`,
-            dataType: "json",
-            success: function (data) {
-                currentPage = parseInt(page);
-                pageCapacity = parseInt(capacity);
-                taskCount = data;
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-            },
-            timeout: 500,
+        const request = new Request('/api/v1/task/list/amount/', {
+          method: 'GET',
+          headers: headers,
+        });
+
+        fetch(request)
+        .then((response) => response.json())
+        .then((json) => {
+            currentPage = parseInt(page);
+            pageCapacity = parseInt(capacity);
+            taskCount = json;
         });
     }
     let taskCollection = [];
     async function requestPage(page, capacity) {
-        window.$.ajax({
-            type: "GET",
-            url: `/api/v1/task/list/${page}/${capacity}/`,
-            dataType: "json",
-            success: function(data) {
-                taskCollection = data;
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-            },
-            timeout: 500,
+        const request = new Request(
+            `/api/v1/task/list/${page}/${capacity}/`, {
+          method: 'GET',
+          headers: headers,
+        });
+
+        fetch(request)
+        .then((response) => response.json())
+        .then((json) => {
+            taskCollection = json;
         });
     }
 
@@ -70,17 +72,17 @@
         }
     }
     async function search(sample) {
-        window.$.ajax({
-            type: "GET",
-            url: `/api/v1/task/search/${sample}/`,
-            dataType: "json",
-            success: function(data) {
-                taskCount = 0;
-                taskCollection = data;
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-            },
-            timeout: 500,
+        const request = new Request(
+            `/api/v1/task/search/${sample}/`, {
+          method: 'GET',
+          headers: headers,
+        });
+
+        fetch(request)
+        .then((response) => response.json())
+        .then((json) => {
+            taskCollection = json;
+            taskCount = 0;
         });
     }
 
@@ -90,14 +92,16 @@
     }
 
     async function requestTask(id,render) {
-        window.$.ajax({
-            type: "GET",
-            url: `/api/v1/task/${id}/`,
-            dataType: "json",
-            success: render,
-            error: function (jqXHR, textStatus, errorThrown) {
-            },
-            timeout: 500,
+        const request = new Request(
+            `/api/v1/task/${id}/`, {
+          method: 'GET',
+          headers: headers,
+        });
+
+        fetch(request)
+        .then((response) => response.json())
+        .then((json) => {
+            render(json);
         });
     }
 
@@ -121,6 +125,6 @@
     <Paging bind:page={currentPage} bind:capacity={pageCapacity}
         bind:taskCount={taskCount} {settings}
         on:move="{browsePage}"></Paging>
-    <DetailTaskView bind:isModal="{isModal}" {...task}></DetailTaskView>
 </div>
 <div class="{isModal ? 'modal-backdrop fade in' : ''}"></div>
+<DetailTaskView bind:isModal="{isModal}" {...task}></DetailTaskView>
