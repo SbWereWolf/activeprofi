@@ -1,4 +1,3 @@
-<!--suppress UnnecessaryLabelJS -->
 <script>
     import {onMount} from 'svelte';
 
@@ -107,6 +106,7 @@
 
     let task = {};
     let isModal = false;
+
     function renderTask(data) {
         const isSuccess = data.hasOwnProperty(0);
         if (isSuccess) {
@@ -115,16 +115,20 @@
         }
     }
 
+    import {fade} from 'svelte/transition';
+
 </script>
-<svelte:body class:modal-open="{isModal}"/>
 <div class="container">
     <h1>Трекер рабочих заданий</h1>
-    <SearchForm on:search={applySample}></SearchForm>
+    <SearchForm on:search={applySample}/>
     <TaskList on:show="{browseTask}"
-    bind:taskCollection="{taskCollection}"></TaskList>
+              bind:taskCollection="{taskCollection}"/>
     <Paging bind:page={currentPage} bind:capacity={pageCapacity}
-        bind:taskCount={taskCount} {settings}
-        on:move="{browsePage}"></Paging>
+            bind:taskCount={taskCount} {settings}
+            on:move="{browsePage}"/>
 </div>
-<div class="{isModal ? 'modal-backdrop fade in' : ''}"></div>
-<DetailTaskView bind:isModal="{isModal}" {...task}></DetailTaskView>
+{#if isModal}
+    <div transition:fade>
+        <DetailTaskView bind:isModal="{isModal}" {...task}/>
+    </div>
+{/if}
