@@ -1,3 +1,4 @@
+<!--suppress ES6UnusedImports, ES6MissingAwait -->
 <script>
     import {onMount} from 'svelte';
 
@@ -17,6 +18,7 @@
         const pageIndex = event.detail.index;
         renderPage(pageIndex);
     }
+
     onMount(() => {
         renderPage();
     });
@@ -27,38 +29,41 @@
     }
 
     const headers = new Headers(
-        {"Content-Type": "application/json; charset=utf-8",});
+            {"Content-Type": "application/json; charset=utf-8",});
 
     let currentPage = 0;
     let pageCapacity = 0;
     let taskCount = {};
+
     async function requestPaging(page, capacity) {
         const request = new Request('/api/v1/task/list/amount/', {
-          method: 'GET',
-          headers: headers,
+            method: 'GET',
+            headers: headers,
         });
 
         fetch(request)
-        .then((response) => response.json())
-        .then((json) => {
-            currentPage = parseInt(page);
-            pageCapacity = parseInt(capacity);
-            taskCount = json;
-        });
+                .then((response) => response.json())
+                .then((json) => {
+                    currentPage = parseInt(page);
+                    pageCapacity = parseInt(capacity);
+                    taskCount = json;
+                });
     }
+
     let taskCollection = [];
+
     async function requestPage(page, capacity) {
         const request = new Request(
-            `/api/v1/task/list/${page}/${capacity}/`, {
-          method: 'GET',
-          headers: headers,
-        });
+                `/api/v1/task/list/${page}/${capacity}/`, {
+                    method: 'GET',
+                    headers: headers,
+                });
 
         fetch(request)
-        .then((response) => response.json())
-        .then((json) => {
-            taskCollection = json;
-        });
+                .then((response) => response.json())
+                .then((json) => {
+                    taskCollection = json;
+                });
     }
 
     async function applySample(event) {
@@ -70,19 +75,20 @@
             renderPage();
         }
     }
+
     async function search(sample) {
         const request = new Request(
-            `/api/v1/task/search/${sample}/`, {
-          method: 'GET',
-          headers: headers,
-        });
+                `/api/v1/task/search/${sample}/`, {
+                    method: 'GET',
+                    headers: headers,
+                });
 
         fetch(request)
-        .then((response) => response.json())
-        .then((json) => {
-            taskCollection = json;
-            taskCount = 0;
-        });
+                .then((response) => response.json())
+                .then((json) => {
+                    taskCollection = json;
+                    taskCount = 0;
+                });
     }
 
     function browseTask(event) {
@@ -92,16 +98,16 @@
 
     async function requestTask(id,render) {
         const request = new Request(
-            `/api/v1/task/${id}/`, {
-          method: 'GET',
-          headers: headers,
-        });
+                `/api/v1/task/${id}/`, {
+                    method: 'GET',
+                    headers: headers,
+                });
 
         fetch(request)
-        .then((response) => response.json())
-        .then((json) => {
-            render(json);
-        });
+                .then((response) => response.json())
+                .then((json) => {
+                    render(json);
+                });
     }
 
     let task = {};

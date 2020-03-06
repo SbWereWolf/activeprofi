@@ -39,42 +39,58 @@
                 <form role="form">
                     <div class="form-group">
                         <label for="title">
-                            <span class="glyphicon glyphicon-text-color"></span>
+                            <span class="glyphicon
+                            glyphicon-text-color"></span>
                             Заголовок</label>
-                        <input id="title" type="text" class="form-control"
-                               value="{title}" placeholder="Значение не задано"
+                        <input id="title" type="text"
+                               class="form-control"
+                               value="{title}"
+                               placeholder="Значение не задано"
                                disabled>
                     </div>
                     <div class="form-group">
                         <label for="date">
-                            <span class="glyphicon glyphicon-time"></span>
+                            <span class="glyphicon glyphicon-time">
+
+                            </span>
                             Дата выполнения</label>
-                        <input id="date" type="text" class="form-control"
-                               value="{date}" placeholder="Значение не задано"
+                        <input id="date" type="text"
+                               class="form-control"
+                               value="{date}"
+                               placeholder="Значение не задано"
                                disabled>
                     </div>
                     <div class="form-group">
                         <label for="author"><span
-                                class="glyphicon glyphicon-user"></span> Автор</label>
-                        <input id="author" type="text" class="form-control"
-                               value="{author}" placeholder="Значение не задано"
+                                class="glyphicon glyphicon-user">
+                        </span> Автор</label>
+                        <input id="author" type="text"
+                               class="form-control"
+                               value="{author}"
+                               placeholder="Значение не задано"
                                disabled>
                     </div>
                     <div class="form-group">
                         <label for="status">
-                            <span class="glyphicon glyphicon-check"></span>
+                            <span class="glyphicon glyphicon-check">
+                            </span>
                             Статус</label>
-                        <input id="status" type="text" class="form-control"
-                               value="{status}" placeholder="Значение не задано"
+                        <input id="status" type="text"
+                               class="form-control"
+                               value="{status}"
+                               placeholder="Значение не задано"
                                disabled>
                     </div>
                     <div class="form-group">
                         <label for="description"><span
-                                class="glyphicon glyphicon-pencil"></span>
+                                class="glyphicon glyphicon-pencil">
+                        </span>
                             Описание</label>
-                        <textarea id="description" class="form-control"
+                        <textarea id="description"
+                                  class="form-control"
                                   bind:value="{description}"
-                                  placeholder="Значение не задано" disabled></textarea>
+                                  placeholder="Значение не задано"
+                                  disabled></textarea>
                     </div>
                 </form>
             </div>
