@@ -3,19 +3,21 @@
     export let text = "";
     export let css = "";
 
-    let number = index +1;
+    let number = index + 1;
+
     function skip() {
         return !(text === "");
     }
 
     let letSkip = skip();
-    let noSkip = !letSkip;
 
-    import { createEventDispatcher } from "svelte";
+    import {createEventDispatcher} from "svelte";
+
     const dispatch = createEventDispatcher();
+
     function moveTo() {
-        if(noSkip){
-            dispatch("move", {index:index});
+        if (!letSkip) {
+            dispatch("move", {index: index});
         }
     }
 </script>
@@ -23,7 +25,7 @@
     {#if letSkip}
         {text}
     {/if}
-    {#if noSkip}
+    {#if !letSkip}
         {number}
     {/if}
 </td>
